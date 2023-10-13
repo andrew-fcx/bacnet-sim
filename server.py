@@ -5,7 +5,7 @@ from device import SimDevice
 from constants import *
 
 
-DEVICE_COUNT = 11 # 11 = BAC0 -> BACA
+DEVICE_COUNT = 6 # 11 = BAC0 -> BAC5
 
 
 def update(device, count):
@@ -23,12 +23,12 @@ def update(device, count):
             r2 = randint(1, 20)
             device.update_enabled(r2)
         if count % EIGHT_HR == 0:
-            r3 = randint(1, 8)
+            r3 = randint(1, 20)
             device.update_temp_sp(r3)
             device.update_rh_sp(r3)
             
         if count % SIX_HR == 0:
-            r4 = randint(1, 8)
+            r4 = randint(1, 20)
             device.update_fan_spd_sp(r4)
 
     except Exception as e:

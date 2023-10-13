@@ -32,7 +32,7 @@ class SimDevice(object):
             presentValue=random.uniform(5, 100),
         )
             
-        for i in range(0, 20):
+        for i in range(0, 50):
             # frequencies
             if i != 0:
                 analog_input(
@@ -107,34 +107,16 @@ class SimDevice(object):
                 description="Relative Humidity",
                 presentValue=rh,
             )
-            
-        
-        for i in range(20, 50):
-            # More alarms
-            multistate_input(
-                name=f"alarm_{i}",
-                description="Alarm",
-                properties={"stateText": self.alarm_states},
-                presentValue=random.randint(0, len(ALARM_STATES)-1),
-                is_commandable=True,
-            )
-            
-            # More on/off
-            binary_input(
-                name=f"enabled_{i}",
-                presentValue= False if random.random() < 0.5 else True,
-            )
-            
-            
+
         return _new_objects.add_objects_to_application(self._d)
     
-    def _update_sp(self, name, count, range_low=0, range_hi=19, rand_low=0, rand_hi=20):
+    def _update_sp(self, name, count, range_low=0, range_hi=49, rand_low=0, rand_hi=20):
         for _ in range(count):
             r = random.randint(range_low, range_hi)
             new_sp = random.randint(rand_low, rand_hi)
             self._d[f"{name}_{r}"].presentValue = new_sp
             
-    def _update_val(self, name, sp_name, delta_threshold=1.5, delta_scale=4, val_scale=2, range_low=0, range_high=20):
+    def _update_val(self, name, sp_name, delta_threshold=1.5, delta_scale=4, val_scale=2, range_low=0, range_high=50):
         for i in range(range_low, range_high):
             sp = val(self._d[f"{sp_name}_{i}"].presentValue)
             pv = val(self._d[f"{name}_{i}"].presentValue)
@@ -156,7 +138,7 @@ class SimDevice(object):
             self._d[f"{name}_{i}"].presentValue = round(new_v, 2)
     
     def update_freq(self):
-        for i in range(0, 20):
+        for i in range(0, 50):
             new_freq = random.uniform(5, 100)
             self._d[f"frequency_{i}"].presentValue = new_freq
     
@@ -166,7 +148,7 @@ class SimDevice(object):
     
     def update_temp(self):
         self._update_val("temp_degC", "temp_sp", delta_scale=20)
-        for i in range(20):
+        for i in range(50):
             new_t_c = val(self._d[f"temp_degC_{i}"].presentValue)
             
             new_t_f = (new_t_c * 9 / 5) + 32
