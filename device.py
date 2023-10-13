@@ -81,15 +81,22 @@ class SimDevice(object):
             )
             
             # Fan speed %
+            fan_spd_sp = round(random.uniform(0, 100), 2)
+            fan_spd = round(fan_spd_sp + random.random() * 2, 2)
+            analog_output(
+                name=f"fan_spd_sp_{i}",
+                description="Fan Speed Setpoint Percentage",
+                presentValue=fan_spd_sp,
+            )
             analog_input(
                 name=f"fan_spd_pct_{i}",
                 description="Fan Speed Percentage",
-                presentValue=round(random.uniform(0, 100), 2),
+                presentValue=fan_spd,
             )
             
             # humidity
-            rh_sp = random.uniform(5, 80)
-            rh = rh_sp + random.random()
+            rh_sp = round(random.uniform(5, 80), 2)
+            rh = round(rh_sp + random.random(), 2)
             analog_output(
                 name=f"rh_sp_{i}",
                 description="Relative Humidity SP",
@@ -121,93 +128,79 @@ class SimDevice(object):
             
         return _new_objects.add_objects_to_application(self._d)
     
+    def _update_sp(self, name, count, range_low=0, range_hi=19, rand_low=0, rand_hi=20):
+        for _ in range(count):
+            r = random.randint(range_low, range_hi)
+            new_sp = random.randint(rand_low, rand_hi)
+            self._d[f"{name}_{r}"].presentValue = new_sp
+            
+    def _update_val(self, name, sp_name, delta_threshold=1.5, delta_scale=4, val_scale=2, range_low=0, range_high=20):
+        for i in range(range_low, range_high):
+            sp = val(self._d[f"{sp_name}_{i}"].presentValue)
+            pv = val(self._d[f"{name}_{i}"].presentValue)
+            
+            delta = abs(pv - sp)
+            adj = 0
+            old_v = sp
+            if delta >= delta_threshold:
+                if sp > pv:
+                    adj = delta / delta_scale
+                elif pv > sp:
+                    adj = -1 * delta / delta_scale
+                    
+                old_v = pv + adj
+                    
+            sign = -1 if random.random() < 0.5 else 1
+            new_v = old_v + (sign * random.random() / val_scale)
+            
+            self._d[f"{name}_{i}"].presentValue = round(new_v, 2)
+    
     def update_freq(self):
         for i in range(0, 20):
             new_freq = random.uniform(5, 100)
             self._d[f"frequency_{i}"].presentValue = new_freq
-            
-            # print(f"Frequency {i}:", new_freq)
     
+    # Temperature updates
     def update_temp_sp(self, num):
-        for _ in range(num):
-            r = random.randint(0, 19)
-            new_sp = random.randint(0, 20)
-            self._d[f"temp_sp_{r}"].presentValue = new_sp
+        self._update_sp("temp_sp", num)
     
     def update_temp(self):
-        for i in range(0, 20):
-            sp = val(self._d[f"temp_sp_{i}"].presentValue)
-            pv = val(self._d[f"temp_degC_{i}"].presentValue)
+        self._update_val("temp_degC", "temp_sp", delta_scale=20)
+        for i in range(20):
+            new_t_c = val(self._d[f"temp_degC_{i}"].presentValue)
             
-            delta = abs(pv - sp)
-            adj = 0
-            old_t = sp
-            if delta >= 1.5:
-                if sp > pv:
-                    adj = delta / 4
-                elif pv > sp:
-                    adj = -1 * delta / 4
-                    
-                old_t = pv + adj
-                    
-            sign = -1 if random.random() < 0.5 else 1
-            new_t = old_t + (sign * random.random() / 2)
-            new_tf = (new_t * 9 / 5) + 32
-            
-            self._d[f"temp_degC_{i}"].presentValue = round(new_t, 2)
-            self._d[f"temp_degF_{i}"].presentValue = round(new_tf, 2)
-            
+            new_t_f = (new_t_c * 9 / 5) + 32
+            self._d[f"temp_degF_{i}"].presentValue = round(new_t_f, 2)
+           
+    # Humidity updates 
     def update_rh_sp(self, num):
-        for _ in range(num):
-            r = random.randint(0, 19)
-            new_sp = random.randint(2, 80)
-            self._d[f"rh_sp_{r}"].presentValue = new_sp
+        self._update_sp("rh_sp", num, rand_low=2, rand_hi=80)
             
     def update_rh(self):
-        for i in range(0, 20):
-            sp = val(self._d[f"rh_sp_{i}"].presentValue)
-            pv = val(self._d[f"rh_{i}"].presentValue)
-            
-            delta = abs(pv - sp)
-            adj = 0
-            old_rh = sp
-            if delta >= 1.5:
-                if sp > pv:
-                    adj = delta / 4
-                elif pv > sp:
-                    adj = -1 * delta / 4
-                    
-                old_rh = pv + adj
-                    
-            sign = -1 if random.random() < 0.5 else 1
-            new_rh = old_rh + (sign * random.random() / 2)
-            
-            self._d[f"rh_{i}"].presentValue = round(new_rh, 2)
-            
+        self._update_val("rh", "rh_sp", delta_scale=10)
+          
+    # Alarm updates  
     def update_alarm(self, num):
         for _ in range(num):
             r = random.randint(0, 49)
             v = random.randint(0, len(ALARM_STATES)-1)
             self._d[f"alarm_{r}"].presentValue = v
             
+    # On/off updates
     def update_enabled(self, num):
         for _ in range(num):
             r = random.randint(0, 49)
             v = val(self._d[f"enabled_{r}"].presentValue)
             self._d[f"enabled_{r}"].presentValue = not v
             
-    def update_fan_speed(self):
-        for i in range(20):
-            spd = val(self._d[f"fan_spd_pct_{i}"].presentValue)
+    # Fan speed updates
+    def update_fan_spd_sp(self, num):
+        self._update_sp("fan_spd_sp", num, rand_low=5, rand_hi=90)
             
-            sign = -1 if random.random() < 0.5 else 1
-            r1 = random.random()
-            r2 = random.uniform(0, 5)
-            new_spd = spd + sign * r1 * r2
-            new_spd = max(0, min(100, new_spd))
-            
-            self._d[f"fan_spd_pct_{i}"].presentValue = new_spd
+    def update_fan_spd(self):
+        self._update_val("fan_spd_pct", "fan_spd_sp", delta_scale=1, delta_threshold=3, val_scale=0.5)
         
+    # Disconnect device
     def disconnect(self):
         self._d.disconnect()
 

@@ -2,6 +2,10 @@ from time import sleep
 import sys
 from random import randint
 from device import SimDevice
+from constants import *
+
+
+DEVICE_COUNT = 11 # 11 = BAC0 -> BACA
 
 
 def update(device, count):
@@ -9,34 +13,48 @@ def update(device, count):
         device.update_freq()
         device.update_temp()
         device.update_rh()
-        if count % 300 == 0:
-            device.update_fan_speed()
-        if count % 900 == 0:
+        device.update_fan_spd()
+        if count % FIVE_MIN == 0:
+            device.update_fan_spd()
+        if count % FIFTEEN_MIN == 0:
             r1 = randint(1, 20)
             device.update_alarm(r1)
             
             r2 = randint(1, 20)
             device.update_enabled(r2)
-        if count % 48000 == 0:
-            r3 = randint(1, 20)
+        if count % EIGHT_HR == 0:
+            r3 = randint(1, 8)
             device.update_temp_sp(r3)
+            device.update_rh_sp(r3)
             
-            r4 = randint(1, 20)
-            device.update_rh_sp(r4)
+        if count % SIX_HR == 0:
+            r4 = randint(1, 8)
+            device.update_fan_spd_sp(r4)
+
     except Exception as e:
         raise e
 
 
 if __name__ == "__main__":
-    d1 = SimDevice('47808', '1110')
+    port = START_PORT
+    dev_id = START_DEV_ID
+    devices = []
+    for i in range(DEVICE_COUNT):
+        d = SimDevice(str(port), str(dev_id))
+        devices.append(d)
+        
+        port += 1
+        dev_id += 1
     
     c = 0
     while True:
         try:
-            update(d1, c)
+            for dev in devices:
+                update(dev, c)
             c += 1
-            sleep(1)
+            sleep(SLEEP_DURATION)
         except Exception as e:
             print(e)
-            d1.disconnect()
+            for dev in devices:
+                dev.disconnect()
             sys.exit(1)
