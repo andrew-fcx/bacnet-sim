@@ -1,3 +1,7 @@
+# https://www.youtube.com/watch?v=F_IcLN_HZGg
+# https://www.controlscourse.com/bacnet-objects/
+# https://bac0.readthedocs.io/en/latest/index.html
+
 import random
 from BAC0 import lite
 from BAC0.core.devices.local.object import ObjectFactory
