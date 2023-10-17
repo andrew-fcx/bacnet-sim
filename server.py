@@ -5,7 +5,7 @@ from device import SimDevice
 from constants import *
 
 
-DEVICE_COUNT = 6 # 11 = BAC0 -> BAC5
+DEVICE_COUNT = 12 # 11 = BAC0 -> BACC
 
 
 def update(device, count):
