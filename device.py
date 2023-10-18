@@ -26,7 +26,7 @@ class SimDevice(object):
         self._d = lite(port=port, deviceId=device_id)
         
         self._d._update_local_cov_task.task.stop()
-        self._d._update_local_cov_task.running = True
+        self._d._update_local_cov_task.running = False
         
         self._define_objects()
         
