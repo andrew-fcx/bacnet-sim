@@ -3,7 +3,7 @@
 # https://bac0.readthedocs.io/en/latest/index.html
 
 import random
-from BAC0 import lite
+from BAC0 import lite, device
 from BAC0.core.devices.local.object import ObjectFactory
 from BAC0.core.devices.local.models import (
     analog_input,
@@ -24,6 +24,10 @@ class SimDevice(object):
         self.device_id = device_id
         self.alarm_states = make_state_text(ALARM_STATES)
         self._d = lite(port=port, deviceId=device_id)
+        
+        self._d._update_local_cov_task.task.stop()
+        self._d._update_local_cov_task.running = True
+        
         self._define_objects()
         
     def _define_objects(self):
