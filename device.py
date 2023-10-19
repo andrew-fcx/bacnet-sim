@@ -14,6 +14,7 @@ from BAC0.core.devices.local.models import (
     multistate_input
 )
 from bacpypes.primitivedata import Real
+# import logging
 
 ALARM_STATES = ["OK", "ALARM_LOW", "ALARM_MED", "ALARM_HI", "UNKNOWN"]
 
@@ -193,6 +194,11 @@ class SimDevice(object):
     # Disconnect device
     def disconnect(self):
         self._d.disconnect()
+        
+    def keep_cov_disabled(self):
+        self._d._update_local_cov_task.task.stop()
+        self._d._update_local_cov_task.running = False
+        print("COV disabled")
 
 
 def val(v):

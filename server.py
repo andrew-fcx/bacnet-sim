@@ -10,11 +10,13 @@ DEVICE_COUNT = 6 # BAC0 -> BAC5
 
 def update(device, count):
     try:
+        # device.keep_cov_disabled()
         device.update_freq()
         device.update_temp()
         device.update_rh()
         device.update_fan_spd()
         if count % FIVE_MIN == 0:
+            device.keep_cov_disabled()
             device.update_fan_spd()
         if count % FIFTEEN_MIN == 0:
             r1 = randint(1, 20)
